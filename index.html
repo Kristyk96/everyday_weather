@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="el">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Ζωντανός πίνακας αυτόνομου μετεωρολογικού σταθμού ESP32">
+    <title>Your Weather — Ζάκυνθος</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Αυτόνομος μετεωρολογικός σταθμός</p>
+        <h1>Your Weather</h1>
+        <p class="subtitle">Πραγματικές μετρήσεις και πρόγνωση για Ζάκυνθο</p>
+      </div>
+      <div class="connection" id="station-status" aria-live="polite">
+        Αναμονή δεδομένων σταθμού…
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="panel temperatures" aria-labelledby="temperature-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Τώρα</p>
+            <h2 id="temperature-title">Θερμοκρασία</h2>
+          </div>
+        </div>
+
+        <div class="temperature-grid">
+          <article class="temperature-card station-temperature">
+            <span class="metric-label">Πραγματική θερμοκρασία σταθμού</span>
+            <strong><span id="station-temp">--</span> °C</strong>
+            <small>Μέτρηση BME280</small>
+          </article>
+
+          <article class="temperature-card forecast-temperature">
+            <div class="forecast-summary">
+              <div>
+                <span class="metric-label">OpenWeather</span>
+                <strong><span id="forecast-temp">--</span> °C</strong>
+                <p id="forecast-description">Αναμονή πρόγνωσης…</p>
+                <small>Αίσθηση: <span id="forecast-feels">--</span> °C</small>
+              </div>
+              <img id="forecast-icon" alt="" hidden>
+            </div>
+          </article>
+        </div>
+
+        <div class="sun-times">
+          <span>Ανατολή <strong id="sunrise">--:--</strong></span>
+          <span>Δύση <strong id="sunset">--:--</strong></span>
+        </div>
+        <p class="inline-status" id="forecast-status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="measurements-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ThingSpeak</p>
+            <h2 id="measurements-title">Μετρήσεις σταθμού</h2>
+          </div>
+          <span id="station-updated">Τελευταία μέτρηση: --</span>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card">
+            <span class="metric-label">Υγρασία</span>
+            <strong><span id="humidity">--</span> %</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Πίεση</span>
+            <strong><span id="pressure">--</span> hPa</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">UV Index</span>
+            <strong id="uv-index">--</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Μέσος άνεμος</span>
+            <strong><span id="wind-average">--</span> km/h</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Ριπή ανέμου</span>
+            <strong><span id="wind-gust">--</span> km/h</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Διεύθυνση ανέμου</span>
+            <strong id="wind-direction">--</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Βροχή 3 λεπτών</span>
+            <strong><span id="rain-interval">--</span> mm</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Συνολική βροχή</span>
+            <strong><span id="rain-total">--</span> mm</strong>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">eCO₂</span>
+            <strong><span id="eco2">--</span> ppm</strong>
+            <small>Ισοδύναμο CO₂</small>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">TVOC</span>
+            <strong><span id="tvoc">--</span> ppb</strong>
+          </article>
+        </div>
+
+        <div class="warning" id="fire-warning" hidden>
+          Ενδεικτική προειδοποίηση αυξημένου κινδύνου πυρκαγιάς.
+          Δεν αποτελεί επίσημο δείκτη πολιτικής προστασίας.
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="forecast-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Ανά 3 ώρες</p>
+            <h2 id="forecast-title">Πρόγνωση επόμενων 24 ωρών</h2>
+          </div>
+        </div>
+        <div class="forecast-strip" id="forecast-list"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="history-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Ιστορικό</p>
+            <h2 id="history-title">Πρόσφατες μετρήσεις</h2>
+          </div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <h3>Θερμοκρασία και υγρασία</h3>
+            <canvas id="climate-chart"></canvas>
+          </div>
+          <div class="chart-card">
+            <h3>Άνεμος και UV</h3>
+            <canvas id="wind-chart"></canvas>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>ESP32 · ThingSpeak · OpenWeather</span>
+      <span id="page-updated">Τελευταίος έλεγχος σελίδας: --</span>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
+
